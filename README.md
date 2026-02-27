@@ -1,43 +1,113 @@
-# Astro Starter Kit: Minimal
+# fh_practice - Static Pokedex with Astro
 
-```sh
-pnpm create astro@latest -- --template minimal
-```
+Static web application built with Astro that consumes the PokeAPI to list Pokemon and generate detail pages for each one.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Technical objective
 
-## 🚀 Project Structure
+- Render a Pokemon list on the home page using remote data.
+- Create static dynamic routes (`/pokemons/[name]`) during build.
+- Reuse components and TypeScript typing to keep consistency.
 
-Inside of your Astro project, you'll see the following folders and files:
+## Stack
+
+- Astro `^5.17.1`
+- TypeScript (API response typing)
+- Tailwind CSS v4 (`@tailwindcss/vite`)
+- Axios `^1.13.5`
+
+## Scripts
+
+- `pnpm dev`: starts local development server at `http://localhost:4321`
+- `pnpm build`: generates production output into `dist/`
+- `pnpm preview`: serves the local production build
+
+## Project structure
 
 ```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+.
+|-- public/
+|   |-- favicon.ico
+|   `-- favicon.svg
+|-- src/
+|   |-- components/
+|   |   `-- pokemons/
+|   |       `-- PokemonCard.astro
+|   |-- interfaces/
+|   |   `-- pokemos-list.response.ts
+|   |-- layouts/
+|   |   `-- MainLayout.astro
+|   |-- pages/
+|   |   |-- index.astro
+|   |   `-- pokemons/
+|   |       `-- [name].astro
+|   `-- styles/
+|       `-- global.css
+|-- astro.config.mjs
+`-- package.json
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Architecture and data flow
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+1. `src/pages/index.astro`
+- Sends a request to `https://pokeapi.co/api/v2/pokemon`.
+- Types the response as `PokemonListResponse`.
+- Renders each item with `PokemonCard`.
 
-Any static assets, like images, can be placed in the `public/` directory.
+2. `src/pages/pokemons/[name].astro`
+- Implements `getStaticPaths`.
+- Requests `https://pokeapi.co/api/v2/pokemon?limit=151`.
+- Generates static routes for the first 151 Pokemon.
+- Uses `url` as `props` to derive `id` and build cry audio URL.
 
-## 🧞 Commands
+3. `src/components/pokemons/PokemonCard.astro`
+- Reusable presentational component.
+- Gets `id` by parsing the PokeAPI `url`.
+- Builds official artwork URL from PokeAPI GitHub assets.
+- Links to `/pokemons/{name}`.
 
-All commands are run from the root of the project, from a terminal:
+4. `src/layouts/MainLayout.astro`
+- Defines base layout, metadata, and global styles.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+## Consumed endpoints
 
-## 👀 Want to learn more?
+- Base list:
+  - `GET https://pokeapi.co/api/v2/pokemon`
+- List used for static route generation:
+  - `GET https://pokeapi.co/api/v2/pokemon?limit=151`
+- ID-derived resources:
+  - Image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{id}.png`
+  - Audio: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/{id}.ogg`
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## Local setup
+
+### Requirements
+
+- Node.js 18+
+- pnpm 8+
+
+### Steps
+
+```bash
+pnpm install
+pnpm dev
+```
+
+Open `http://localhost:4321`.
+
+## Technical considerations
+
+- The project generates static content; dynamic-route data is resolved at build time.
+- If the external API fails during build, page generation can fail.
+- `PokemonCard` currently includes `console.log(imageSrc)`; removing it is recommended to reduce log noise.
+- File name `pokemos-list.response.ts` appears to have a typo (`pokemos` vs `pokemons`), but it does not break behavior as long as imports stay consistent.
+
+## Suggested improvements
+
+- Add API error handling and empty states.
+- Parameterize Pokemon limit with an environment variable.
+- Add integration tests for static routes.
+- Add runtime schema validation for external API responses.
+
+## License
+
+Educational / practice use.
