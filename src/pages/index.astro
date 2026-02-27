@@ -1,25 +1,26 @@
 ---
+import MainLayout from "@layouts/MainLayout.astro";
+import axios from "axios";
+import type { PokemonListResponse } from "@interfaces/pokemos-list.response";
+import PokemonCard from "@components/pokemons/PokemonCard.astro";
+import Title from "@components/shared/Title.astro";
 
-import MainLayout from '../layouts/MainLayout.astro'
-import axios from 'axios'
-import type { PokemonListResponse} from '../interfaces/pokemos-list.response'
-import PokemonCard from '../components/pokemons/PokemonCard.astro'
+const resp = await axios.get("https://pokeapi.co/api/v2/pokemon");
+let pokemons = (await resp.data) as PokemonListResponse;
 
-const resp = await axios.get('https://pokeapi.co/api/v2/pokemon')
-let pokemons = await resp.data as PokemonListResponse
-
-const title = 'Pokemon Static | Home'
+const title = "Pokemon Static | Home";
 ---
 
 <MainLayout title={title}>
-    <h1 class="text-3xl text-blue-500">Lista de Pokemons</h1>
-	<hr/>
-	<section aria-label="Lista de Pokemons" class="grid grid-cols-1 sm:grid-cols-4 md:grid-cols-5 gap-4 mt-6
-	">
-		{pokemons.results.map((pokemon) => (
-			 <PokemonCard name={pokemon.name} url={pokemon.url}/>
-			//console.log(pokemon)
-		))}
-	</section>	
-	
+  <Title>Listado</Title>
+  <section
+    aria-label="Lista de Pokemons"
+    class="grid grid-cols-1 sm:grid-cols-4 md:grid-cols-5 gap-4 mt-6"
+  >
+    {
+      pokemons.results.map((pokemon) => (
+        <PokemonCard name={pokemon.name} url={pokemon.url} />
+      ))
+    }
+  </section>
 </MainLayout>
